@@ -14,7 +14,6 @@ this.KEY_LEFT = 37;
 this.KEY_UP = 38;
 this.KEY_RIGHT = 39;
 this.KEY_DOWN = 40;
-
 this.KEY_A = 65;
 this.KEY_D = 68;
 this.KEY_S = 83;
@@ -22,7 +21,6 @@ this.KEY_W = 87;
 this.KEY_SHIFT = 16;
 };
 
-var keyboard = new Keyboard();
 
 Keyboard.prototype.onKeyDown = function(evt)
 {
