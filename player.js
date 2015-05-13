@@ -1,3 +1,18 @@
+var LEFT = 0;
+var RIGHT = 1;
+var ANIM_IDLE_LEFT = 0;
+var ANIM_JUMP_LEFT = 1;
+var ANIM_WALK_LEFT = 2;
+var ANIM_SHOOT_LEFT = 3;
+var ANIM_CLIMB = 4;
+var ANIM_IDLE_RIGHT = 5;
+var ANIM_JUMP_RIGHT = 6;
+var ANIM_WALK_RIGHT = 7;
+var ANIM_SHOOT_RIGHT = 8;
+var ANIM_MAX = 6;
+
+
+
 var Player = function() 
 {
 this.sprite = new Sprite("ChuckNorris.png");
@@ -17,9 +32,8 @@ for(var i=0; i<ANIM_MAX; i++)
 {
 this.sprite.setAnimationOffset(i, -55, -87);
 }
-this.image = document.createElement("img");
 this.position = new Vector2();
-this.position.set = ( 9*35, 0 * 35);
+this.position.set = ( 9*35, 0 *35);
 this.width = 159;
 this.height = 163;
 this.velocity = new Vector2();
@@ -28,18 +42,6 @@ this.jumping = false;
 this.direction = LEFT;
 };
 
-var LEFT = 0;
-var RIGHT = 1;
-var ANIM_IDLE_LEFT = 0;
-var ANIM_JUMP_LEFT = 1;
-var ANIM_WALK_LEFT = 2;
-var ANIM_SHOOT_LEFT = 3;
-var ANIM_CLIMB = 4;
-var ANIM_IDLE_RIGHT = 5;
-var ANIM_JUMP_RIGHT = 6;
-var ANIM_WALK_RIGHT = 7;
-var ANIM_SHOOT_RIGHT = 8;
-var ANIM_MAX = 9;
 
 Player.prototype.update = function(deltaTime)
 	{
@@ -53,17 +55,51 @@ Player.prototype.update = function(deltaTime)
 		 if(keyboard.isKeyDown(keyboard.KEY_LEFT) == true) 
 		 {
 		 	left = true;
+			this.direction = LEFT;
+			if(this.sprite.currentAnimation != ANIM_WALK_LEFT)
+				this.sprite.setAnimation(ANIM_WALK_LEFT);
 		 }
 
-		 if(keyboard.isKeyDown(keyboard.KEY_RIGHT) == true) 
+		  if(keyboard.isKeyDown(keyboard.KEY_RIGHT) == true) 
 		 {
 		 	right = true;
+			this.direction = RIGHT;
+			if(this.sprite.currentAnimation != ANIM_WALK_RIGHT)
+				this.sprite.setAnimation(ANIM_WALK_RIGHT);
 		 }
 
 		 if(keyboard.isKeyDown(keyboard.KEY_SPACE) == true) 
 		 {
 		 	jump = true;
+			if (jump && !this.jumping && !falling)
+		{
+		// apply an instantaneous (large) vertical impulse
+		ddy = ddy - JUMP;
+		 this.jumping = true;
+		if(this.direction == LEFT)
+		this.sprite.setAnimation(ANIM_JUMP_LEFT)
+		else
+		this.sprite.setAnimation(ANIM_JUMP_RIGHT)
 		 }
+		 
+		 }
+		 else
+		{
+		if(this.jumping == false && this.falling == false)
+	{
+		if(this.direction == LEFT)
+	{
+	 	if(this.sprite.currentAnimation != ANIM_IDLE_LEFT)
+	 	this.sprite.setAnimation(ANIM_IDLE_LEFT);
+	}
+		else
+	{
+		 if(this.sprite.currentAnimation != ANIM_IDLE_RIGHT)
+		 this.sprite.setAnimation(ANIM_IDLE_RIGHT);
+		}
+	}
+	} 
+		 
 
 		 var wasleft = this.velocity.x < 0;
 		 var wasright = this.velocity.x > 0;
@@ -85,6 +121,18 @@ Player.prototype.update = function(deltaTime)
 			 this.jumping = true;
 		 }
 
+		 if (jump && !this.jumping && !falling)
+{
+// apply an instantaneous (large) vertical impulse
+ddy = ddy - JUMP;
+ this.jumping = true;
+if(this.direction == LEFT)
+this.sprite.setAnimation(ANIM_JUMP_LEFT)
+else
+this.sprite.setAnimation(ANIM_JUMP_RIGHT)
+}
+
+		 
 		 // calculate the new position and velocity:
 		 this.position.y = Math.floor(this.position.y + (deltaTime * this.velocity.y));
 		 this.position.x = Math.floor(this.position.x + (deltaTime * this.velocity.x));
@@ -171,7 +219,6 @@ Player.prototype.draw = function()
 	context.save();
 		context.translate(this.position.x, this.position.y);
 		context.rotate(this.rotation);
-		context.drawImage(this.image, -this.width/2, -this.height/2);
 	context.restore();
 }
 
