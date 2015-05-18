@@ -33,7 +33,7 @@ for(var i=0; i<ANIM_MAX; i++)
 this.sprite.setAnimationOffset(i, -55, -87);
 }
 this.position = new Vector2();
-this.position.set = ( 9*35, 0 *35);
+this.position.Set( 9*35, 0 *35);
 this.width = 159;
 this.height = 163;
 this.velocity = new Vector2();
@@ -42,7 +42,7 @@ this.jumping = false;
 this.direction = LEFT;
 };
 
-
+var PLAYER_SPEED = 300;
 Player.prototype.update = function(deltaTime)
 	{
 		this.sprite.update(deltaTime);
@@ -54,37 +54,26 @@ Player.prototype.update = function(deltaTime)
 		// check keypress events
 		 if(keyboard.isKeyDown(keyboard.KEY_LEFT) == true) 
 		 {
+			 this.x -= PLAYER_SPEED * deltaTime;
 		 	left = true;
 			this.direction = LEFT;
 			if(this.sprite.currentAnimation != ANIM_WALK_LEFT)
 				this.sprite.setAnimation(ANIM_WALK_LEFT);
 		 }
+	
 
-		  if(keyboard.isKeyDown(keyboard.KEY_RIGHT) == true) 
+		  else if(keyboard.isKeyDown(keyboard.KEY_RIGHT) == true) 
 		 {
+			 this.x += PLAYER_SPEED * deltaTime;
 		 	right = true;
 			this.direction = RIGHT;
 			if(this.sprite.currentAnimation != ANIM_WALK_RIGHT)
 				this.sprite.setAnimation(ANIM_WALK_RIGHT);
 		 }
 
-		 if(keyboard.isKeyDown(keyboard.KEY_SPACE) == true) 
-		 {
-		 	jump = true;
-			if (jump && !this.jumping && !falling)
-		{
-		// apply an instantaneous (large) vertical impulse
-		ddy = ddy - JUMP;
-		 this.jumping = true;
-		if(this.direction == LEFT)
-		this.sprite.setAnimation(ANIM_JUMP_LEFT)
-		else
-		this.sprite.setAnimation(ANIM_JUMP_RIGHT)
-		 }
-		 
-		 }
-		 else
-		{
+		else {
+			
+			
 		if(this.jumping == false && this.falling == false)
 	{
 		if(this.direction == LEFT)
@@ -99,7 +88,20 @@ Player.prototype.update = function(deltaTime)
 		}
 	}
 	} 
+		 if(keyboard.isKeyDown(keyboard.KEY_SPACE) == true) 
+         {
+            jump = true;
+         } 
 		 
+		 if(this.cooldownTimer > 0)
+{
+this.cooldownTimer -= deltaTime;
+}
+if(keyboard.isKeyDown(keyboard.KEY_SPACE) == true && this.cooldownTimer <= 0) {
+sfxFire.play();
+this.cooldownTimer = 0.3;
+// Shoot a bullet
+}
 
 		 var wasleft = this.velocity.x < 0;
 		 var wasright = this.velocity.x > 0;
@@ -217,8 +219,8 @@ Player.prototype.draw = function()
 {
 	this.sprite.draw(context, this.position.x, this.position.y);
 	context.save();
-		context.translate(this.position.x, this.position.y);
-		context.rotate(this.rotation);
+		context.translate(this.x, this.y);
+		//context.drawImage(this.image, this.position.x , this.position.y);
 	context.restore();
 }
 
