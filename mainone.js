@@ -39,14 +39,14 @@ var SCREEN_HEIGHT = canvas.height;
 var fps = 0;
 var fpsCount = 0;
 var fpsTime = 0;
-
+var score = 0;
 // load an image to draw
 //var chuckNorris = document.createElement("img");
 //chuckNorris.src = "hero.png";
 
 var player = new Player();
 var keyboard = new Keyboard();
-
+var lives = 3;
 var LAYER_COUNT = 2;
  // number of layers in level
 
@@ -95,7 +95,8 @@ var JUMP = METER * 1500;
 
 var tileset = document.createElement("img");
 tileset.src = "tileset.png";
-
+var heartImage = document.createElement("img");
+heartImage.src = "heartImage.png" 
 
 function cellAtPixelCoord(layer, x, y)
 {
@@ -252,9 +253,19 @@ function run()
 	drawMap();
 	player.draw();
 
-
+// score
+context.fillStyle = "yellow";
+context.font="32px Arial";
+var scoreText = "Score: " + score;
+context.fillText(scoreText, SCREEN_WIDTH - 170, 35);
 
 	//context.drawImage(chuckNorris, SCREEN_WIDTH/2 - chuckNorris.width/2, SCREEN_HEIGHT/2 - chuckNorris.height/2);
+	
+	// life counter
+for(var i=0; i<lives; i++)
+{
+ context.drawImage(heartImage, 20 + ((heartImage.width+2)*i), 10);
+}
 	
 		
 	// update the frame counter 
