@@ -288,8 +288,8 @@ hit = true;
 }
 for(var j=0; j<enemies.length; j++)
 {
-if(intersects( bullets[i].position.x, bullets[i].position.y, TILE, TILE,
- enemies[j].position.x, enemies[j].position.y, TILE, TILE) == true)
+//if(intersects( bullets[i].position.x, bullets[i].position.y, TILE, TILE,
+ //enemies[j].position.x, enemies[j].position.y, TILE, TILE) == true)
 {
 // kill both the bullet and the enemy
 enemies.splice(j, 1);

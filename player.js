@@ -102,9 +102,12 @@ this.cooldownTimer -= deltaTime;
 }
 
 //shooting
-if(keyboard.isKeyDown(keyboard.KEY_SPACE) == true && this.cooldownTimer <= 0) {
+if(keyboard.isKeyDown(keyboard.KEY_SPACE) == true)// this.cooldownTimer <= 0) 
+{
+	
 sfxFire.play();
-this.cooldownTimer = 0.3;
+//this.cooldownTimer = 0.3;
+
 // Shoot a bullet
 var	tempBullet = new Bullet((this.position.x), this.position.y);
 		if(this.direction == LEFT)
