@@ -27,6 +27,14 @@ function getDeltaTime()
 	return deltaTime;
 }
 
+var STATE_SPLASH = 0;
+var STATE_GAME = 1;
+var STATE_GAMEOVER = 2;
+
+
+
+var gameState = STATE_SPLASH;
+
 //-------------------- Don't modify anything above here
 
 var SCREEN_WIDTH = canvas.width;
@@ -40,6 +48,7 @@ var fps = 0;
 var fpsCount = 0;
 var fpsTime = 0;
 var score = 0;
+var cooldownTimer = 0;
 // load an image to draw
 //var chuckNorris = document.createElement("img");
 //chuckNorris.src = "hero.png";
@@ -129,7 +138,15 @@ function cellAtTileCoord(layer, tx, ty)
 	return cells[layer][ty][tx];
 };
 
+function tileToPixel (tile)
+{
+	return tile * TILE;
+};
 
+function pixelToTile (pixel)
+{
+	return Math.floor(pixel/TILE);
+};
 
 function bound(value, min, max)
 {
@@ -164,6 +181,7 @@ function drawMap()
 
  for( var layerIdx=0; layerIdx < LAYER_COUNT; layerIdx++ )
  {
+	 var idx = 0;
  for( var y = 0; y < level1.layers[layerIdx].height; y++ )
  {
  var idx = y * level1.layers[layerIdx].width + startX;
@@ -187,15 +205,6 @@ function drawMap()
  }
 }
 
-function tileToPixel (tile)
-{
-	return tile * TILE;
-};
-
-function pixelToTile (pixel)
-{
-	return Math.floor(pixel/TILE);
-};
 
 var cells = []; // array that holds a simplified collission data
 
@@ -261,77 +270,133 @@ isSfxPlaying = false;
 }
 } );
 		}
-	
-
-
-function run()
+		function intersects (x1, y1, w1, h1, x2, y2, w2, h2)
 {
-	context.fillStyle = "#ccc";		
-	context.fillRect(0, 0, canvas.width, canvas.height);
-	
-	var deltaTime = getDeltaTime();
-	
-	player.update(deltaTime);
-	for(var i=0; i<enemies.length; i++)
-{
-enemies[i].update(deltaTime);
-}
-	// update the bullets
-	var hit=false;
-for(var i=0; i<bullets.length; i++)
-{
-bullets[i].update(deltaTime);
-if( bullets[i].position.x - worldOffsetX < 0 ||
-bullets[i].position.x - worldOffsetX > SCREEN_WIDTH)
-{
-hit = true;
-}
-for(var j=0; j<enemies.length; j++)
-{
-//if(intersects( bullets[i].position.x, bullets[i].position.y, TILE, TILE,
- //enemies[j].position.x, enemies[j].position.y, TILE, TILE) == true)
-{
-// kill both the bullet and the enemy
-enemies.splice(j, 1);
-hit = true;
-// increment the player score
-score += 1;
-break;
-}
-}
-if(hit == true)
-{
-bullets.splice(i, 1);
-break;
-}
-}
-	
-	drawMap();
-	player.draw();
-
-	//draw bullet
-for(var i=0; i<bullets.length; i++)
+	if(y2 + h2 < y1 ||
+		x2 + w2 < x1 ||
+		x2 > x1 + w1 ||
+		y2 > y1 + h1)
 	{
-	 	bullets[i].draw(deltaTime);
+		return false;
+	}
+	return true;
+}
+		
+		
+		var splashTimer = 3
+function runSplash(deltaTime)
+{
+	var StartGame = document.createElement("img");
+	StartGame.src = "StartGame.png";
+	context.drawImage(StartGame, 0, 0);
+
+		
+	context.fillStyle = "black";
+	context.font= "40px Arial";
+	
+	
+	
+	splashTimer -= deltaTime
+	if(splashTimer <= 0)
+	{
+		gameState = STATE_GAME;
+		return;
+	}
+}
+		
+		
+function runGame(deltaTime)	
+{
+	player.update(deltaTime);
+	
+	for(var i=0; i<enemies.length; i++)
+	{
+		enemies[i].update(deltaTime);
 	}
 	
-// score
-context.fillStyle = "yellow";
-context.font="32px Arial";
-var scoreText = "Score: " + score;
-context.fillText(scoreText, SCREEN_WIDTH - 170, 35);
-
-drawMap();
-	player.draw();
-	//context.drawImage(chuckNorris, SCREEN_WIDTH/2 - chuckNorris.width/2, SCREEN_HEIGHT/2 - chuckNorris.height/2);
+	var hit = false;
+	for(var i=0; i<bullets.length; i++)
+	{
+		bullets[i].update(deltaTime);
+		if(bullets[i].position.x - worldOffsetX < 0 ||
+			bullets[i].position.x - worldOffsetX > SCREEN_WIDTH)
+		{
+			hit = true;
+		}
+for(var j=0; j<enemies.length; j++)
+		{
+			if(intersects(enemies[j].position.x, enemies[j].position.y, TILE, TILE,
+				bullets[i].position.x, bullets[i].position.y, TILE, TILE)== true)
+			{
+				//kill both bullet and enemy
+				enemies.splice(j, 1);
+				enemies.life -=1;
+				hit = true;
+				//increment score
+				score += 1;
+				break;
+			}
+		}
 	
-	// life counter
-for(var i=0; i<lives; i++)
+
+if(hit == true)
+		{
+			bullets.splice(i, 1);
+			break;
+		}
+	}
+	
+	for(var j=0; j<enemies.length; j++)
+		{
+			if(player.isDead == false)
+			{
+				if(intersects(enemies[j].position.x, enemies[j].position.y, TILE, TILE,
+					player.position.x, player.position.y, player.width/2, player.height/2)== true)
+				{
+				//player.isDead == true;
+				lives -= 1;
+				player.position.Set(9*35, 0*35);
+				break;
+				}
+			}
+		}
+
+	drawMap();
+	player.draw();
+	
+	for(var i=0; i<enemies.length; i++)
+	{
+		enemies[i].draw(deltaTime);
+	}
+	
+	for(var i=0; i<bullets.length; i++)
+	{
+		bullets[i].draw(deltaTime);
+	}
+
+	var respawnTimer = 1;
+	for(var i=0; i<lives; i++)
+	
 {
  context.drawImage(heartImage, 20 + ((heartImage.width+2)*i), 10);
 }
-		
-	// update the frame counter 
+
+
+	if(player.isDead == false)
+	{
+		if(player.position.y > SCREEN_HEIGHT)
+		{
+				player.isDead == true;
+				lives -= 1;
+				player.position.set(9*35, 0*35);
+		}
+		if(lives == 0)
+		{
+			gameState = STATE_GAMEOVER;
+			return;
+		}
+	}		
+// update the frame counter 
 	fpsTime += deltaTime;
 	fpsCount++;
 	if(fpsTime >= 1)
@@ -346,10 +411,49 @@ for(var i=0; i<lives; i++)
 	context.font="14px Arial";
 	context.fillText("FPS: " + fps, 5, 20, 100);
 	
+		
+// score
+context.fillStyle = "yellow";
+context.font="32px Arial";
+var scoreText = "Score: " + score;
+context.fillText(scoreText, SCREEN_WIDTH - 170, 35);
+
 }
 
+var endTimer = 5
 
-initialize();
+function runGameOver()
+{
+	var title = document.createElement("img");
+	title.src = "GameOver.png"
+context.drawImage(title, (canvas.width/2) - 150, (canvas.height/2) - 200);
+	
+	context.fillStyle = "red";
+	context.font= "50px Arial";
+	
+}
+function run()
+{
+	context.fillStyle = "#ccc";		
+	context.fillRect(0, 0, canvas.width, canvas.height);
+	
+	var deltaTime = getDeltaTime();
+	
+	switch(gameState)
+	{
+		case STATE_SPLASH:
+		runSplash(deltaTime);
+		break;
+		case STATE_GAME:
+		runGame(deltaTime);
+		break;
+		case STATE_GAMEOVER:
+		runGameOver(deltaTime);
+		break;
+	}
+}
+	initialize();
+
 
 //-------------------- Don't modify anything below here
 

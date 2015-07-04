@@ -250,13 +250,19 @@ this.sprite.setAnimation(ANIM_JUMP_RIGHT)
 		}
 	}
 
+	/*if(this.position.y > SCREEN_HEIGHT)
+	{
+		lives -= 1;
+		this.position.Set(9*35, 0*35);
+	}*/
+
 
 Player.prototype.draw = function()
 {
 	this.sprite.draw(context, this.position.x, this.position.y);
-	context.save();
-		context.translate(this.x, this.y);
+	//context.save();
+		//context.translate(this.x, this.y);
 		//context.drawImage(this.image, this.position.x , this.position.y);
-	context.restore();
+	//context.restore();
 }
 
