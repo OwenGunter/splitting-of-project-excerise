@@ -40,6 +40,7 @@ this.velocity = new Vector2();
 this.falling = true;
 this.jumping = false;
 this.direction = LEFT;
+this.isDead = false;
 };
 
 var PLAYER_SPEED = 300;

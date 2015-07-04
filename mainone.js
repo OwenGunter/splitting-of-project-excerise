@@ -330,7 +330,6 @@ for(var i=0; i<lives; i++)
 {
  context.drawImage(heartImage, 20 + ((heartImage.width+2)*i), 10);
 }
-	
 		
 	// update the frame counter 
 	fpsTime += deltaTime;
