@@ -1,3 +1,4 @@
+
 var canvas = document.getElementById("gameCanvas");
 var context = canvas.getContext("2d");
 
@@ -27,19 +28,10 @@ function getDeltaTime()
 	return deltaTime;
 }
 
-var STATE_SPLASH = 0;
-var STATE_GAME = 1;
-var STATE_GAMEOVER = 2;
-
-
-
-var gameState = STATE_SPLASH;
-
 //-------------------- Don't modify anything above here
 
 var SCREEN_WIDTH = canvas.width;
 var SCREEN_HEIGHT = canvas.height;
-
 
 // some variables to calculate the Frames Per Second (FPS - this tells use
 // how fast our game is running, and allows us to make the game run at a 
@@ -47,31 +39,18 @@ var SCREEN_HEIGHT = canvas.height;
 var fps = 0;
 var fpsCount = 0;
 var fpsTime = 0;
-var score = 0;
-var cooldownTimer = 0;
-// load an image to draw
-//var chuckNorris = document.createElement("img");
-//chuckNorris.src = "hero.png";
 
-var player = new Player();
-var keyboard = new Keyboard();
-var enemey = new Enemy();
-var bullet = new Bullet();
-var lives = 3;
+var STATE_SPLASH = 0;
+var STATE_GAME = 1;
+var STATE_GAMEOVER = 2;
 
-var ENEMY_MAXDX = METER * 5;
-var ENEMY_ACCEL = ENEMY_MAXDX * 2;
-var enemies = [];
-var bullets = [];
-
-var LAYER_COUNT = 3;
+var gameState = STATE_SPLASH;
 
 
-var MAP = {tw:20, th:15}; 
+var MAP = {tw:40, th:15}; 
 // specifies size of the level. (tiles wide  x  tiles high)
 
 var TILE = 35;
- // the width/height of each tile in pixels our pics are different?
 
 var TILESET_TILE = TILE*2;
 // The width/height of a tile in the tileset. Because the images are twice as big as 
@@ -89,12 +68,6 @@ var TILESET_COUNT_X = 14;
 var TILESET_COUNT_Y = 14; 
 //How many rows of tile images are in the tileset
 
-// variables to map the layers in our level
-//var LAYER_BACKGROUND = 0;
-var LAYER_OBJECT_ENEMIES = 2;
-var LAYER_PLATFORMS = 1;
-var LAYER_LADDERS = 0;
-
 // arbitrary choice for 1m
 var METER = TILE;
  // very exaggerated gravity (6x)
@@ -110,13 +83,34 @@ var FRICTION = MAXDX * 6;
  // (a large) instantaneous jump impulse
 var JUMP = METER * 1500;
 
+var player = new Player();
+var keyboard = new Keyboard();
+var enemy = new Enemy();
+//var position = new Vector2();
+var bullet = new Bullet();
 
-var tileset = document.createElement("img");
-tileset.src = "tileset.png";
+
+// HUD
+var lives = 3;
+var score = 0;
+
 var heartImage = document.createElement("img");
 heartImage.src = "heartImage.png" 
 
+//var cooldownTimer = 0;
+// load an image to draw
+//var chuckNorris = document.createElement("img");
+//chuckNorris.src = "hero.png";
+var enemies = [];
+var bullets = [];
 
+
+var ENEMY_MAXDX = METER * 5;
+var ENEMY_ACCEL = ENEMY_MAXDX * 2;
+
+
+var tileset = document.createElement("img");
+tileset.src = "tileset.png";
 
 function cellAtPixelCoord(layer, x, y)
 {
@@ -138,6 +132,8 @@ function cellAtTileCoord(layer, tx, ty)
 	return cells[layer][ty][tx];
 };
 
+
+
 function tileToPixel (tile)
 {
 	return tile * TILE;
@@ -157,7 +153,12 @@ function bound(value, min, max)
 	return value;
 }
 
+var LAYER_COUNT = 2;
+var LAYER_PLATFORMS = 0;
+var LAYER_OBJECT_ENEMIES = 1;
+
 var worldOffsetX =0;
+
 function drawMap()
 {
  var startX = -1;
@@ -181,17 +182,16 @@ function drawMap()
 
  for( var layerIdx=0; layerIdx < LAYER_COUNT; layerIdx++ )
  {
-	 var idx = 0;
- for( var y = 0; y < level1.layers[layerIdx].height; y++ )
+ for( var y = 0; y < level2.layers[layerIdx].height; y++ )
  {
- var idx = y * level1.layers[layerIdx].width + startX;
+ var idx = y * level2.layers[layerIdx].width + startX;
  for( var x = startX; x < startX + maxTiles; x++ )
  {
- if( level1.layers[layerIdx].data[idx] != 0 )
+ if( level2.layers[layerIdx].data[idx] != 0 )
  {
  // the tiles in the Tiled map are base 1 (meaning a value of 0 means no tile),
  // so subtract one from the tileset id to get the correct tile
- var tileIndex = level1.layers[layerIdx].data[idx] - 1;
+ var tileIndex = level2.layers[layerIdx].data[idx] - 1;
  var sx = TILESET_PADDING + (tileIndex % TILESET_COUNT_X) *
 (TILESET_TILE + TILESET_SPACING);
  var sy = TILESET_PADDING + (Math.floor(tileIndex / TILESET_COUNT_Y)) *
@@ -205,7 +205,6 @@ function drawMap()
  }
 }
 
-
 var cells = []; // array that holds a simplified collission data
 
 var musicBackground;
@@ -217,12 +216,12 @@ function initialize()
 	{
 		cells[layerIdx] = [];
 		var idx = 0;
-		for(var y = 0; y < level1.layers[layerIdx].height; y++)
+		for(var y = 0; y < level2.layers[layerIdx].height; y++)
 		{
 			cells[layerIdx][y] = [];
-			for(var x = 0; x < level1.layers[layerIdx].width; x++)
+			for(var x = 0; x < level2.layers[layerIdx].width; x++)
 			{
-				if(level1.layers[layerIdx].data[idx] != 0)
+				if(level2.layers[layerIdx].data[idx] != 0)
 					// for each tile we find in the layer data, we need to create 4 collisions
  					// (because our collision squares are 35x35 but the tile in the
 					// level are 70x70)
@@ -238,11 +237,12 @@ function initialize()
 					}
 			idx++;
 			}
-		}		// add enemies
+		}
+	}		// add enemies
 idx = 0;
-for(var y = 0; y < level1.layers[LAYER_OBJECT_ENEMIES].height; y++) {
-for(var x = 0; x < level1.layers[LAYER_OBJECT_ENEMIES].width; x++) {
-if(level1.layers[LAYER_OBJECT_ENEMIES].data[idx] != 0) {
+for(var y = 0; y < level2.layers[LAYER_OBJECT_ENEMIES].height; y++) {
+for(var x = 0; x < level2.layers[LAYER_OBJECT_ENEMIES].width; x++) {
+if(level2.layers[LAYER_OBJECT_ENEMIES].data[idx] != 0) {
 var px = tileToPixel(x);
 var py = tileToPixel(y);
 var e = new Enemy(px, py);
@@ -251,7 +251,7 @@ enemies.push(e);
 idx++;
 }
 } 
-	}
+	
 			musicBackground = new Howl(
 {
 urls: ["background.ogg"],
@@ -313,6 +313,8 @@ function runGame(deltaTime)
 	{
 		enemies[i].update(deltaTime);
 	}
+		drawMap();
+	player.draw();
 	
 	var hit = false;
 	for(var i=0; i<bullets.length; i++)
@@ -361,8 +363,6 @@ if(hit == true)
 			}
 		}
 
-	drawMap();
-	player.draw();
 	
 	for(var i=0; i<enemies.length; i++)
 	{
@@ -388,14 +388,14 @@ if(hit == true)
 		{
 				player.isDead == true;
 				lives -= 1;
-				player.position.set(9*35, 0*35);
+				player.position.Set(9*35, 0*35);
 		}
 		if(lives == 0)
 		{
 			gameState = STATE_GAMEOVER;
 			return;
 		}
-	}		
+	}	
 // update the frame counter 
 	fpsTime += deltaTime;
 	fpsCount++;

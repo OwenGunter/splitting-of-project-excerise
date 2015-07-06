@@ -8,7 +8,7 @@ this.sprite.setLoop(0, false);
 this.position = new Vector2();
 this.position.Set(x, y);
 
-var BULLET_SPEED = 500;
+//var BULLET_SPEED = 500;
 
 this.velocity = new Vector2();
 this.moveRight = moveRight;
